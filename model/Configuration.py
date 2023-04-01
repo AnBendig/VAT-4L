@@ -56,7 +56,7 @@ class Configuration:
             "db_name": "",
             "db_user": "",
             "db_password": "",
-            "db_server": ""
+            "db_server": "",
         }
         with open("config.ini", "w") as f:
             config.write(f)

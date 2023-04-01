@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 from model import DirectoryEntry
 from model import Entry
+from model import Configuration
 
 class DirectoryScanner:
     """
@@ -13,16 +14,14 @@ class DirectoryScanner:
         if config is None:
             pass
 
-        self._Config = config
+        self._Config: Configuration = config
         self._FolderList = []
-
         self._FolderList.append(self._Config.str_root_folder)
 
     def startScan(self):
         print("starte Scan...")
-        my_path = "C:\\Users\\andreas.bendig\\OneDrive - bmsoft information technologies GmbH\\Dokumente"
 
-        with os.scandir(my_path) as entries:
+        with os.scandir(self._Config.str_root_folder) as entries:
             for entry in entries:
                 if entry.is_dir():
                     my_dir: DirectoryEntry = DirectoryEntry.DirectoryEntry()
