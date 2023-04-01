@@ -1,10 +1,11 @@
-from model import Configuration, DirectoryScanner
+import Configuration
+import DirectoryScanner
 
 Config = Configuration.Configuration()
 
 Config.load()
 
-if Config.bol_is_configuration_needed :
+if Config.isConfigurationNeeded :
     print("Bitte öffnen Sie die Konfiguration, tragen die notwendigen Daten ein und speichern diese.")
     exit(1010)
 
