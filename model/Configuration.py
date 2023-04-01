@@ -1,7 +1,6 @@
 from configparser import ConfigParser
 from os.path import exists
 
-
 class Configuration:
     """
     Klasse zur Verwaltung der in der Konfigurationsdatei gepflegten Informationen.
@@ -14,15 +13,15 @@ class Configuration:
     def __init__(self):
         # Initialisieren der Attribute der Klasse
 
-        self.system = None          # Ziel-Betriebssystem
-        self.root_folder = None     # Root(Wurzel)- Ordner
-        self.log_file_path = None   # Pfad zur Log-Datei
-        self.db_server = None       # Name des Zielservers
-        self.db_name = None         # Name der Datenbank
-        self.db_user = None         # Benutzername der Datenbank
-        self.db_password = None     # Passwort des verwendeten Benutzers TODO: Verschlüsselt ablegen
+        self.str_system = None          # Ziel-Betriebssystem
+        self.str_root_folder = None     # Root(Wurzel)- Ordner
+        self.str_log_file_path = None   # Pfad zur Log-Datei
+        self.str_db_server = None       # Name des Zielservers
+        self.str_db_name = None         # Name der Datenbank
+        self.str_db_user = None         # Benutzername der Datenbank
+        self.str_db_password = None     # Passwort des verwendeten Benutzers TODO: Verschlüsselt ablegen
 
-        self.isConfigurationNeeded = True    # Konfiguration muss eingestellt werden
+        self.bol_is_configuration_needed = True    # Konfiguration muss eingestellt werden
 
     def load(self):
         config = ConfigParser()
@@ -30,18 +29,18 @@ class Configuration:
             config = ConfigParser()
             config.read('config.ini')
 
-            self.system = config["ROOT"]["system"]
-            self.root_folder = config["ROOT"]["path"]
+            self.str_system = config["ROOT"]["system"]
+            self.str_root_folder = config["ROOT"]["path"]
 
             if config.has_option("ROOT","log_file_path"):
-                self.log_file_path = config["ROOT"]["log_file_path"]
+                self.str_log_file_path = config["ROOT"]["log_file_path"]
 
-            self.db_name = config["DATABASE"]["db_name"]
-            self.db_user = config["DATABASE"]["db_user"]
-            self.db_password = config["DATABASE"]["db_password"]
-            self.db_server = config["DATABASE"]["db_server"]
+            self.str_db_name = config["DATABASE"]["db_name"]
+            self.str_db_user = config["DATABASE"]["db_user"]
+            self.str_db_password = config["DATABASE"]["db_password"]
+            self.str_db_server = config["DATABASE"]["db_server"]
 
-            self.isConfigurationNeeded = False
+            self.bol_is_configuration_needed = False
         else:
             self.createConfigFile()
 
