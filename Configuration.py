@@ -32,7 +32,9 @@ class Configuration:
 
             self.system = config["ROOT"]["system"]
             self.root_folder = config["ROOT"]["path"]
-            self.log_file_path = config["ROOT"]["log_file_path"]
+
+            if config.has_option("ROOT","log_file_path"):
+                self.log_file_path = config["ROOT"]["log_file_path"]
 
             self.db_name = config["DATABASE"]["db_name"]
             self.db_user = config["DATABASE"]["db_user"]
