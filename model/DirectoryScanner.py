@@ -21,6 +21,9 @@ class DirectoryScanner:
     def startScan(self):
         print("starte Scan...")
 
+        flt_ts_start= datetime.timestamp(datetime.now())
+
+
         int_file_counter: int = 0
         int_dir_counter:int =0
 
@@ -61,7 +64,8 @@ class DirectoryScanner:
                                 print(" --> Dateityp: " + str(my_file.str_extension))
 
                 str_current_folder = next(iter(self._FolderList), None)
-
+        flt_ts_end = datetime.timestamp(datetime.now())
 
         print("Anzahl der gescannten Verzeichnisse: " + str(int_dir_counter))
         print("Anzahl der gescannten Dateien: " + str(int_file_counter))
+        print("Dauer der Ausführung: " + str( (flt_ts_end - flt_ts_start)) + " mics")
