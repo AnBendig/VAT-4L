@@ -3,6 +3,8 @@ import os
 from model.DirectoryEntry import DirectoryEntry
 from model.Entry import Entry
 from model.Configuration import Configuration
+from model.SQLConntect import SQLConnect
+
 
 class DirectoryScanner:
     """
@@ -19,6 +21,12 @@ class DirectoryScanner:
         self._FolderList.append(self._Config.str_root_folder)
 
     def startScan(self):
+        sql_conntector: SQLConnect = SQLConnect()
+
+        with self._Config as conf:
+            sql_conntector.createConnection(conf.str_db_server, "3386", conf.str_db_user, conf.str_db_password, "tbl_scan")
+
+
         print("starte Scan...")
 
         flt_ts_start= datetime.timestamp(datetime.now())
@@ -62,6 +70,9 @@ class DirectoryScanner:
                                 print(" --> Group ID: " + str(my_file.int_group_id))
                                 print(" --> MD5- Hash: " + str(my_file.str_hash_value_md5))
                                 print(" --> Dateityp: " + str(my_file.str_extension))
+
+                                str_query: str= "INSERT INTO `tbl_scan`(`id`, `job_id`, `path`, `file_name`, `extension`, `size`, `hash`, `user_id`, `group_id`, `created_date`, `modified_date`) VALUES (NULL, NULL,'"+ my_file.str_path + "','"+my_file.str_name+ "', '"+ my_file.str_extension+ "', '"+ str(my_file.int_size) + "', '" + my_file.str_hash_value_md5 + "', '" + str(my_file.int_user_id) + "', '" + str(my_file.int_group_id) + "', '" + str(my_file.flt_created_date) + "', '" + str(my_file.flt_modified_date) + "')"
+                                sql_conntector.writeData(str_query)
 
                 str_current_folder = next(iter(self._FolderList), None)
         flt_ts_end = datetime.timestamp(datetime.now())

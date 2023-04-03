@@ -1,4 +1,4 @@
-import mysql.connector
+import  .connector
 class SQLConnect:
 
     def __init__(self):
@@ -29,7 +29,7 @@ class SQLConnect:
 
 
     def writeData(self, str_query: str) -> bool:
-        pass
+        self._sql_cursor.execute(str_query)
 
     def updateData(self, str_query: str) -> bool:
         pass
