@@ -1,13 +1,14 @@
 import hashlib
 import os
-from model.DirectoryEntry import DirectoryEntry
 
+import model.Configuration
+from model.DirectoryEntry import DirectoryEntry
+from model.Configuration import Configuration
 
 class Entry(DirectoryEntry):
-    pass
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, config: Configuration):
+        super().__init__(config)
         self.str_hash_value_md5: str = None
         self.str_extension: str = None
         self.str_name: str =None
@@ -22,6 +23,10 @@ class Entry(DirectoryEntry):
         self.int_size: int = entry.stat().st_size
 
     def _createHash(self, filepath: str):
+        if self._config.strs_ignore_extensions.__contains__(self.str_extension):
+        # if self.str_extension == ".sock" :
+            return "noFile"
+
         hasher = hashlib.md5()
         with open( filepath, 'rb') as afile:
             buf = afile.read()

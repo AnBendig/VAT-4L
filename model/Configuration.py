@@ -15,6 +15,7 @@ class Configuration:
 
         self.str_system = None          # Ziel-Betriebssystem
         self.str_root_folder = None     # Root(Wurzel)- Ordner
+        self.strs_ignore_extensions: str = []    # Datei-Endungen, welche ignoriert werden sollen
         self.str_log_file_path = None   # Pfad zur Log-Datei
         self.str_db_server = None       # Name des Zielservers
         self.str_db_name = None         # Name der Datenbank
@@ -31,6 +32,7 @@ class Configuration:
 
             self.str_system = config["ROOT"]["system"]
             self.str_root_folder = config["ROOT"]["path"]
+            self.strs_ignore_extensions = config["ROOT"]["ignore_extension"].split(";")
 
             if config.has_option("ROOT","log_file_path"):
                 self.str_log_file_path = config["ROOT"]["log_file_path"]
@@ -50,7 +52,8 @@ class Configuration:
         config["ROOT"] = {
             "system": "",
             "path": "",
-            "log_file_path": ""
+            "log_file_path": "",
+            "ignore_extension": ".sock;.lnk"
         }
         config["DATABASE"] = {
             "db_name": "",

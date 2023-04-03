@@ -14,9 +14,11 @@ class SQLConnect:
                 password= str_password,
                 port= str_port,
                 database= str_database)
+
         except:
-            print("Verbindung konnte nicht hergestellt werden")
+            print("Verbindung konnte nicht hergestellt werden: " + x)
             #  TODO: Make Log Entry
+
         else:
             if self._SQLConnection.is_connected():
                 self._bol_is_connected = True
@@ -33,5 +35,6 @@ class SQLConnect:
         pass
 
     def create_table(self, str_table_name: str, str_column):
+        pass
 
 
