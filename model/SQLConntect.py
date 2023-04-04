@@ -1,4 +1,4 @@
-import  .connector
+import mysql.connector
 class SQLConnect:
 
     def __init__(self):
@@ -16,7 +16,7 @@ class SQLConnect:
                 database= str_database)
 
         except:
-            print("Verbindung konnte nicht hergestellt werden: " + x)
+            print("Verbindung konnte nicht hergestellt werden:")
             #  TODO: Make Log Entry
 
         else:
@@ -29,12 +29,12 @@ class SQLConnect:
 
 
     def writeData(self, str_query: str) -> bool:
-        self._sql_cursor.execute(str_query)
+        return self._sql_cursor.execute(str_query)
 
     def updateData(self, str_query: str) -> bool:
         pass
 
-    def create_table(self, str_table_name: str, str_column):
-        pass
+    def commit(self):
+        self._SQLConnection.commit()
 
 

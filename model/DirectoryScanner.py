@@ -21,11 +21,12 @@ class DirectoryScanner:
         self._FolderList.append(self._Config.str_root_folder)
 
     def startScan(self):
-        sql_conntector: SQLConnect = SQLConnect()
-
-        with self._Config as conf:
-            sql_conntector.createConnection(conf.str_db_server, "3386", conf.str_db_user, conf.str_db_password, "tbl_scan")
-
+        sql_connector: SQLConnect = SQLConnect()
+        sql_connector.createConnection(self._Config.str_db_server,
+                                       "3306",
+                                       self._Config.str_db_user,
+                                       self._Config.str_db_password,
+                                       "vat4l")
 
         print("starte Scan...")
 
@@ -50,8 +51,8 @@ class DirectoryScanner:
 
                                 int_dir_counter +=1
                                 print("Verzeichnis: " + my_dir.str_path)
-                                print(" --> Erstellt am: " + str(datetime.fromtimestamp(my_dir.flt_created_date)))  # TODO: Nur für Windows-Systeme
-                                print(" --> Letze Bearbeitung: " + str(datetime.fromtimestamp(my_dir.flt_modified_date)))
+                                print(" --> Erstellt am: " + my_dir.flt_created_date.strftime ('%Y-%m-%d %H:%M:%S'))  # TODO: Nur für Windows-Systeme
+                                print(" --> Letze Bearbeitung: " + my_dir.flt_modified_date.strftime ('%Y-%m-%d %H:%M:%S'))
                                 print(" --> User ID: " + str(my_dir.int_group_id))
                                 print(" --> Group ID: " + str(my_dir.int_group_id))
 
@@ -64,17 +65,25 @@ class DirectoryScanner:
                                 int_file_counter +=1
                                 print("Datei: " + my_file.str_name)
                                 print(" --> Dateigröße: " + str(my_file.int_size) + " Bytes")
-                                print(" --> Erstellt am: " + str(datetime.fromtimestamp(my_file.flt_created_date)))  # TODO: Nur für Windows-Systeme
-                                print(" --> Letze Bearbeitung: " + str(datetime.fromtimestamp(my_file.flt_modified_date)))
+                                print(" --> Erstellt am: " + my_file.flt_created_date.strftime ('%Y-%m-%d %H:%M:%S'))  # TODO: Nur für Windows-Systeme
+                                print(" --> Letze Bearbeitung: " + my_file.flt_modified_date.strftime ('%Y-%m-%d %H:%M:%S'))
                                 print(" --> User ID: " + str(my_file.int_user_id))
                                 print(" --> Group ID: " + str(my_file.int_group_id))
                                 print(" --> MD5- Hash: " + str(my_file.str_hash_value_md5))
                                 print(" --> Dateityp: " + str(my_file.str_extension))
 
-                                str_query: str= "INSERT INTO `tbl_scan`(`id`, `job_id`, `path`, `file_name`, `extension`, `size`, `hash`, `user_id`, `group_id`, `created_date`, `modified_date`) VALUES (NULL, NULL,'"+ my_file.str_path + "','"+my_file.str_name+ "', '"+ my_file.str_extension+ "', '"+ str(my_file.int_size) + "', '" + my_file.str_hash_value_md5 + "', '" + str(my_file.int_user_id) + "', '" + str(my_file.int_group_id) + "', '" + str(my_file.flt_created_date) + "', '" + str(my_file.flt_modified_date) + "')"
-                                sql_conntector.writeData(str_query)
+                                str_query: str= "INSERT INTO `tbl_scan` (`id`, `job_id`, `path`, `file_name`, `extension`, `size`, `hash`, `user_id`, `group_id`, `created_date`, `modified_date`) "
+                                str_query +="VALUES (NULL, NULL,'"+ my_file.str_path + "','"+ my_file.str_name+ "', '" + my_file.str_extension+ "', '"
+                                str_query +=str(my_file.int_size) + "', '" + my_file.str_hash_value_md5 + "', '" + str(my_file.int_user_id) + "', '" + str(my_file.int_group_id)
+                                str_query +="','" + my_file.flt_created_date.strftime ('%Y-%m-%d %H:%M:%S') + "','" + my_file.flt_modified_date.strftime ('%Y-%m-%d %H:%M:%S') + "')"
 
+                                print(str_query)
+
+                                sql_connector.writeData(str_query)
+
+                sql_connector.commit()
                 str_current_folder = next(iter(self._FolderList), None)
+
         flt_ts_end = datetime.timestamp(datetime.now())
 
         print("Anzahl der gescannten Verzeichnisse: " + str(int_dir_counter))

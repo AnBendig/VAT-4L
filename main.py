@@ -1,8 +1,8 @@
-from model import Configuration
-from model import DirectoryScanner
+from model.Configuration import Configuration
+from model.DirectoryScanner import DirectoryScanner
 
-# Auslesen der Kunfigurationsdatei
-Config = Configuration.Configuration()
+# Auslesen der Konfigurationsdatei
+Config = Configuration()
 Config.load()
 
 # Prüfen, ob Konfiguration geladen werden konnte/gefüllt ist
@@ -11,7 +11,7 @@ if Config.bol_is_configuration_needed :
     exit(1010)
 
 # Objekt vom Verzeichnis-Scanner erzeugen
-dirScanner = DirectoryScanner.DirectoryScanner(Config)
+dirScanner = DirectoryScanner(Config)
 
 # Scan starten
 dirScanner.startScan()
