@@ -72,9 +72,10 @@ class DirectoryScanner:
                                 print(" --> MD5- Hash: " + str(my_file.str_hash_value_md5))
                                 print(" --> Dateityp: " + str(my_file.str_extension))
 
-                                str_query: str= "INSERT INTO `tbl_scan` (`id`, `job_id`, `path`, `file_name`, `extension`, `size`, `hash`, `user_id`, `group_id`, `created_date`, `modified_date`) "
+                                str_query: str= "INSERT INTO `tbl_scan` (`id`, `job_id`, `path`, `file_name`, `extension`, `size`, `hash`, `user_id`, `group_id`, `filemode`, `created_date`, `modified_date`) "
                                 str_query +="VALUES (NULL, NULL,'"+ my_file.str_path + "','"+ my_file.str_name+ "', '" + my_file.str_extension+ "', '"
                                 str_query +=str(my_file.int_size) + "', '" + my_file.str_hash_value_md5 + "', '" + str(my_file.int_user_id) + "', '" + str(my_file.int_group_id)
+                                str_query += "','" + my_file.str_filemode
                                 str_query +="','" + my_file.flt_created_date.strftime ('%Y-%m-%d %H:%M:%S') + "','" + my_file.flt_modified_date.strftime ('%Y-%m-%d %H:%M:%S') + "')"
 
                                 print(str_query)
