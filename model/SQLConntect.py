@@ -1,4 +1,6 @@
 import mysql.connector
+from model import Job
+from datetime import datetime
 class SQLConnect:
 
     def __init__(self):
@@ -36,5 +38,15 @@ class SQLConnect:
 
     def commit(self):
         self._SQLConnection.commit()
+
+    def createJob(self)-> Job:
+        job_new: Job = Job.Job()
+        str_query: str = "INSERT INTO `tbl_job` (`dt_start_job`) VALUES ('" + datetime.now().strftime( '%Y-%m-%d %H:%M:%S' ) + "')"
+        self._SQLConnection.cursor().execute(str_query)
+        self._SQLConnection.cursor().getlastrowid()
+
+        return job_new
+
+
 
 

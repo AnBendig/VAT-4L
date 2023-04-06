@@ -1,5 +1,10 @@
 import hashlib
 import os
+import stat
+from pwd import getpwuid
+from grp import getgrgid
+
+from datetime import datetime
 
 import model.Configuration
 from model.DirectoryEntry import DirectoryEntry
@@ -12,15 +17,17 @@ class Entry(DirectoryEntry):
         self.str_hash_value_md5: str = None
         self.str_extension: str = None
         self.str_name: str =None
-        self.bol_isDirectory = False
+        self.bol_is_directory: bool = False
         self.int_size: int = 0
 
     def readEntry(self, entry: os.DirEntry):
         super().readEntry(entry)
-        self.str_hash_value_md5: str = str(self._createHash(entry.path))
-        self.str_extension: str = str(self._getFileType(entry.name))
-        self.str_name: str = entry.name
-        self.int_size: int = entry.stat().st_size
+        if entry.is_file():
+            self.bol_is_directory: bool = False
+            self.str_hash_value_md5: str = str(self._createHash(entry.path))
+            self.str_extension: str = str(self._getFileType(entry.name))
+            self.str_name: str = entry.name
+            self.int_size: int = entry.stat().st_size
 
     def _createHash(self, filepath: str):
         if self._config.strs_ignore_extensions.__contains__(self.str_extension):

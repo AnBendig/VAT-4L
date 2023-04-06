@@ -40,13 +40,13 @@ class DirectoryScanner:
             str_current_folder = next(iter(self._FolderList), None)
 
             while str_current_folder is not None:
-                self._FolderList.remove(str_current_folder)
                 with os.scandir(str_current_folder) as entries:
                     for entry in entries:
-                        if entry.is_dir():
+                        if entry.is_dir() and not entry.is_symlink():
                             my_dir: DirectoryEntry = DirectoryEntry(self._Config)
                             my_dir.readEntry(entry)
-                            if my_dir.bol_is_directory :
+
+                            if not (my_dir.str_path in self._FolderList) :
                                 self._FolderList.append(my_dir.str_path)
 
                                 int_dir_counter +=1
@@ -56,6 +56,18 @@ class DirectoryScanner:
                                 print(" --> User ID: " + str(my_dir.int_group_id))
                                 print(" --> Group ID: " + str(my_dir.int_group_id))
 
+                                str_query: str = "INSERT INTO `tbl_scan` (`id`, `job_id`, `is_directory`, `path`, `user_id`, `user_name`,`group_id`, `group_name`, `filemode`, `created_date`, `modified_date`) "
+                                str_query += "VALUES (NULL, NULL ," + str(my_dir.bol_is_directory).upper() + ", '" + my_dir.str_path + "', '"
+                                str_query += str(my_dir.int_user_id) + "', '" + my_dir.str_user_name + "', '"
+                                str_query += str(my_dir.int_group_id) + "', '" + my_dir.str_group_name + "', '"
+                                str_query += my_dir.str_filemode + "','"
+                                str_query += my_dir.flt_created_date.strftime('%Y-%m-%d %H:%M:%S') + "','" + my_dir.flt_modified_date.strftime('%Y-%m-%d %H:%M:%S') + "')"
+
+                                print(str_query)
+
+                                sql_connector.writeData(str_query)
+                                
+                                
                         else:
                             my_file: Entry = Entry(self._Config)
 
@@ -68,21 +80,27 @@ class DirectoryScanner:
                                 print(" --> Erstellt am: " + my_file.flt_created_date.strftime ('%Y-%m-%d %H:%M:%S'))  # TODO: Nur für Windows-Systeme
                                 print(" --> Letze Bearbeitung: " + my_file.flt_modified_date.strftime ('%Y-%m-%d %H:%M:%S'))
                                 print(" --> User ID: " + str(my_file.int_user_id))
+                                print(" --> User Name: " + my_file.str_user_name)
                                 print(" --> Group ID: " + str(my_file.int_group_id))
+                                print(" --> Group Name: " + my_file.str_group_name)
                                 print(" --> MD5- Hash: " + str(my_file.str_hash_value_md5))
                                 print(" --> Dateityp: " + str(my_file.str_extension))
 
-                                str_query: str= "INSERT INTO `tbl_scan` (`id`, `job_id`, `path`, `file_name`, `extension`, `size`, `hash`, `user_id`, `group_id`, `filemode`, `created_date`, `modified_date`) "
-                                str_query +="VALUES (NULL, NULL,'"+ my_file.str_path + "','"+ my_file.str_name+ "', '" + my_file.str_extension+ "', '"
-                                str_query +=str(my_file.int_size) + "', '" + my_file.str_hash_value_md5 + "', '" + str(my_file.int_user_id) + "', '" + str(my_file.int_group_id)
-                                str_query += "','" + my_file.str_filemode
-                                str_query +="','" + my_file.flt_created_date.strftime ('%Y-%m-%d %H:%M:%S') + "','" + my_file.flt_modified_date.strftime ('%Y-%m-%d %H:%M:%S') + "')"
+                                str_query: str= "INSERT INTO `tbl_scan` (`id`, `job_id`, `is_directory`, `path`, `file_name`, `extension`, `size`, `hash`, `user_id`, `user_name`,`group_id`, `group_name`, `filemode`, `created_date`, `modified_date`) "
+                                str_query += "VALUES (NULL, NULL, " + str(my_file.bol_is_directory).upper() + ", '"+ my_file.str_path + "','"+ my_file.str_name+ "', '" + my_file.str_extension+ "', '"
+                                str_query += str(my_file.int_size) + "', '" + my_file.str_hash_value_md5 + "', '"
+                                str_query += str(my_file.int_user_id) + "', '" + my_file.str_user_name + "', '"
+                                str_query += str(my_file.int_group_id)+ "', '" + my_file.str_group_name + "', '"
+                                str_query += my_file.str_filemode + "','"
+                                str_query += my_file.flt_created_date.strftime ('%Y-%m-%d %H:%M:%S') + "','" + my_file.flt_modified_date.strftime ('%Y-%m-%d %H:%M:%S') + "')"
 
                                 print(str_query)
 
                                 sql_connector.writeData(str_query)
 
                 sql_connector.commit()
+                self._FolderList.remove(str_current_folder)
+
                 str_current_folder = next(iter(self._FolderList), None)
 
         flt_ts_end = datetime.timestamp(datetime.now())
