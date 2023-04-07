@@ -17,10 +17,10 @@ if Config.bol_is_configuration_needed:
 
 sql_connector: SQLConnect = SQLConnect()
 sql_connector.createConnection(Config.str_db_server,
-                               "3306",
+                               Config.str_db_port,
                                Config.str_db_user,
                                Config.str_db_password,
-                               "vat4l")
+                               Config.str_db_name)
 
 current_job: Job = Job()
 current_job.create_job(sql_connector)

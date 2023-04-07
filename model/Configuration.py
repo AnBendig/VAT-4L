@@ -21,6 +21,7 @@ class Configuration:
         self.str_db_name = None         # Name der Datenbank
         self.str_db_user = None         # Benutzername der Datenbank
         self.str_db_password = None     # Passwort des verwendeten Benutzers TODO: Verschlüsselt ablegen
+        self.str_db_port = ""           # Port für den Zugriff auf die Datenbank
 
         self.bol_is_configuration_needed = True    # Konfiguration muss eingestellt werden
 
@@ -41,6 +42,7 @@ class Configuration:
             self.str_db_user = config["DATABASE"]["db_user"]
             self.str_db_password = config["DATABASE"]["db_password"]
             self.str_db_server = config["DATABASE"]["db_server"]
+            self.str_db_port = config["DATABASE"]["db_port"]
 
             self.bol_is_configuration_needed = False
         else:
@@ -60,6 +62,7 @@ class Configuration:
             "db_user": "",
             "db_password": "",
             "db_server": "",
+            "db_port": "3306"
         }
         with open("config.ini", "w") as f:
             config.write(f)

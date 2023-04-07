@@ -1,3 +1,5 @@
+from enum import Enum
+
 import mysql.connector
 from model import Job
 from datetime import datetime
@@ -46,8 +48,39 @@ class SQLConnect:
         return int_last_row
 
 
+class SQLQueryType(Enum):
+    INSERT = 1
+    UPDATE = 2
+    SELECT = 3
+    DELETE = 4
+
+class SQLQueryComposer:
+    def __init__(self):
+        self.str_query : str= ""
+        self.str_keylist: list = []
+        self.str_valuelist: list = []
 
 
+    def add(self, str_key: str, var_value):
+        self.str_keylist.append(str_key)
+        if type(var_value) is bool:
+            self.str_valuelist.append(str(var_value).upper())
+        elif type(var_value) is datetime:
+            self.str_valuelist.append("'" + var_value.strftime('%Y-%m-%d %H:%M:%S') + "'")
+        else:
+            self.str_valuelist.append("'" + str(var_value) + "'")
 
+
+    def _get_string(self,lst_content: list) -> str:
+        return ", ".join(lst_content)
+
+
+    def get_query(self, query_type: SQLQueryType, str_table_name : str):
+        str_query: str = ""
+        if query_type is SQLQueryType.INSERT:
+            str_query = "INSERT INTO " + str_table_name + " (" + self._get_string(self.str_keylist) + ") "
+            str_query += " VALUES (" + self._get_string(self.str_valuelist) + ")"
+
+        return str_query
 
 
