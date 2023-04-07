@@ -14,9 +14,9 @@ class Entry(DirectoryEntry):
 
     def __init__(self, config: Configuration):
         super().__init__(config)
-        self.str_hash_value_md5: str = None
-        self.str_extension: str = None
-        self.str_name: str =None
+        self.str_hash_value_md5: str = ""
+        self.str_extension: str = ""
+        self.str_name: str = ""
         self.bol_is_directory: bool = False
         self.int_size: int = 0
 
@@ -30,8 +30,7 @@ class Entry(DirectoryEntry):
             self.int_size: int = entry.stat().st_size
 
     def _createHash(self, filepath: str):
-        if self._config.strs_ignore_extensions.__contains__(self.str_extension):
-        # if self.str_extension == ".sock" :
+        if self.str_extension in self._config.strs_ignore_extensions:
             return "noFile"
 
         hasher = hashlib.md5()

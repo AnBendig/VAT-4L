@@ -24,7 +24,7 @@ class SQLConnect:
         else:
             if self._SQLConnection.is_connected():
                 self._bol_is_connected = True
-                self._sql_cursor= self._SQLConnection.cursor()
+                self._sql_cursor: mysql.connector.MySQLConnection.cursor= self._SQLConnection.cursor()
 
     def readData(self, str_query: str) -> dict:
         self._sql_cursor.execute(str_query)
@@ -39,13 +39,14 @@ class SQLConnect:
     def commit(self):
         self._SQLConnection.commit()
 
-    def createJob(self)-> Job:
-        job_new: Job = Job.Job()
-        str_query: str = "INSERT INTO `tbl_job` (`dt_start_job`) VALUES ('" + datetime.now().strftime( '%Y-%m-%d %H:%M:%S' ) + "')"
-        self._SQLConnection.cursor().execute(str_query)
-        self._SQLConnection.cursor().getlastrowid()
+    def get_last_row_id(self)-> int:
+        self._sql_cursor.execute('SELECT LAST_INSERT_ID()')  # Add this
+        int_last_row: int = int(self._sql_cursor.fetchone()[0]) # Add this
 
-        return job_new
+        return int_last_row
+
+
+
 
 
 
