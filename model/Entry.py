@@ -6,11 +6,19 @@ from datetime import datetime
 from model.Configuration import Configuration
 
 class Entry:
-
+    """
+    Basisklasse für die Klassen "DirectoryEntry" und "FileEntry"
+    """
     def __init__(self, config: Configuration):
+        """
+        Erstellt ein Objekt der Klasse.
+        :param config:
+            Configuration. Verwaltung der anwendungsspezifischen Parameter
+        """
+
         self._config: Configuration = config
         self.int_user_id: int = -1
-        self.flt_modified_date: datetime = None
+        self.flt_modified_date: datetime = datetime(1,1,1,0,0,0)
         self.int_group_id: int = -1
         self.flt_created_date: datetime = datetime.now()
         self.str_path: str = ""
@@ -25,6 +33,13 @@ class Entry:
         self.int_size: int = 0
 
     def readEntry(self, entry: DirEntry):
+        """
+        Liest die übergebenen Attribute aus einem Verzeichniselement aus.
+        :param entry:
+            os.DirEntry. Das zu bearbeitende Verzeichniselement
+        :return:
+            Keine Rückgabe.
+        """
         if not (entry.is_symlink()):
             self.str_filemode: str = filemode(entry.stat().st_mode)
             self.str_path: str = path.abspath(entry.path)
