@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from json import dumps
 from model.Configuration import Configuration
 from model.SQLConnect import SQLConnect
 
@@ -22,9 +23,11 @@ except Exception as ex:
     print("Es konnte keine Verbindung zur Datenbank hergestellt werden. Der Vorgang wird abgebrochen. " + getattr(ex,'msg'))
     exit(1011)
 
-sql_connector.set_cursor(True)
+sql_connector.set_cursor(False)
 
 application = FastAPI()
+
+
 """
 jobs = [
     {"job_id" : "1", "dt_job_start" : "2023-03-14 12:45:58", "dt_joc_end": "2023-03-14 12:45:59"},
@@ -36,16 +39,19 @@ jobs = [
 
 @application.get("/jobs")
 async def get_job_list():
-    str_query = "SELECT * form tbl_job"
-    result: dict = sql_connector.readData(str_query)
+    str_query = "SELECT * FROM `tbl_job`"
+    result= sql_connector.readData(str_query)
+    js = dumps(result, default=str)
 
-    return result
+    return js
 
-"""
+
 @application.get("/jobs/{job_id}")
 async def get_job_by_id(job_id : int):
-    if (job_id.__le__(len(jobs)) and job_id.__gt__(0)):
-        return jobs[job_id - 1]
+    str_query = "SELECT * FROM `tbl_job`"
+    result = sql_connector.readData(str_query)
+
+    if (job_id.__le__(len(result)) and job_id.__gt__(0)):
+        return dumps(result[job_id - 1], default=str)
     else:
         return "Index out of bounds!"
-"""

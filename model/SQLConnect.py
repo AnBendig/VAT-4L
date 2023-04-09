@@ -62,8 +62,10 @@ class SQLConnect:
             Boolean. Gibt an, ob ein Dictionary als Rückgabe erzeugt wird oder nicht.
         :return:
         """
-
-        self._sql_cursor: mysql.connector.MySQLConnection.cursor = self._SQLConnection.cursor(dictionary= dictionary)
+        if dictionary:
+            self._sql_cursor: mysql.connector.MySQLConnection.cursor = self._SQLConnection.cursor(dictionary=True)
+        else:
+            self._sql_cursor: mysql.connector.MySQLConnection.cursor = self._SQLConnection.cursor(dictionary=False)
 
 
 
@@ -74,9 +76,8 @@ class SQLConnect:
         :return:
         """
 
-        my_dict: dict= {}
         self._sql_cursor.execute(str_query)
-        my_dict = self._sql_cursor.fetchall()
+        my_dict: dict = self._sql_cursor.fetchall()
 
         return my_dict
 
