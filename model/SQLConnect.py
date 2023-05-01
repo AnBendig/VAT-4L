@@ -77,7 +77,7 @@ class SQLConnect:
         """
 
         self._sql_cursor.execute(str_query)
-        my_dict: dict = self._sql_cursor.fetchall()
+        my_dict = self._sql_cursor.fetchall()
 
         return my_dict
 
