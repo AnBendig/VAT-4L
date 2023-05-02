@@ -51,24 +51,28 @@ async def get_api_info():
 @application.get("/vat4l-api/jobs")
 async def get_job_list():
     str_query = "SELECT * FROM tbl_job"
-    result= sql_connector.readData(str_query)
+    result = sql_connector.readData(str_query)
     # return dumps(result, default=str)
     return result
 
-@application.get("/vat4l-api/jobs/{job_id}")
+@application.get("/vat4l-api/getjob/{job_id}")
 async def get_job_by_id(job_id : int):
-    str_query = "SELECT * FROM `tbl_job`"
-    result = sql_connector.readData(str_query)
 
+    str_query = "SELECT * FROM tbl_job WHERE id_job=" + str(job_id)
+
+    result = sql_connector.readData(str_query)
+    return result
+"""
     if job_id.__le__(len(result)) and job_id.__gt__(0):
         # return dumps(result[job_id - 1], default=str)
         return result
     else:
         return "Index out of bounds!"
+"""
 
-@application.get("/vat4l-api/dirs{job_id}")
+@application.get("/vat4l-api/dirs/{job_id}")
 async def get_directories(job_id: int):
-    str_query = "SELECT * FROM `tbl_scan` WHERE is_directory=TRUE AND job_id=" + str(job_id) + " ORDER BY path ASC"
+    str_query = "SELECT * FROM `tbl_scan` WHERE is_directory=TRUE AND job_id=" + str(job_id) + " ORDER BY path"
     result = sql_connector.readData(str_query)
 
     # return dumps(result, default=str)
