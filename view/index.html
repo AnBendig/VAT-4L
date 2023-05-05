@@ -12,11 +12,13 @@
     <h1 class="p-lg-3">VAT-4L</h1>
     <p class="p-2">Verzeichnis-Analyse-Tool für Linux</p>
     <div class="bg-info p-1 m-2 rounded-2">
-      <button class="rounded-2 ">Jobs anzeigen</button>
-      <button class="rounded-2 ">Verzeichnisse anzeigen</button>
-      <button class="rounded-2 " onclick="showSelectedJobs()">Selektierte Jobs anzeigen</button>
-      <button class="rounded-2 " onclick="clearContent()">Bereich leeren</button>
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary" onclick="showJobList()">Jobs anzeigen</button>
+        <button type="button" class="btn btn-primary ">Verzeichnisse anzeigen</button>
+        <button type="button" class="btn btn-primary" onclick="showSelectedJobs()">Selektierte Jobs anzeigen</button>
+        <button type="button" class="btn btn-primary" onclick="clearContent()">Bereich leeren</button>
+      </div>
     </div>
-    <div class="container" id="container"></div>
+    <div class="container-fluid" id="container"></div>
   </body>
 </html>
