@@ -1,91 +1,66 @@
 let container = "";
-let tbl_header = "";
 let api_request = "http://practice.test7.bmsoft.de:8000/vat4l-api";
 
-function vat4lApp() {
+function Vat4lApp() {
 
     this.init = function () {
         container = document.querySelector("#container")
         this.getJobList();
     }
 
-    this.getJobList = function () {
-        fetch(api_request + '/jobs')
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
-                let col_size = ["2", "3", "3", "2", "2"];
-                let job_column_names = ["Auswahl", "Start", "Ende", "verarbeite Verzeichnisse", "verarbeitete Dateien"];
+    this.getJobList = async function () {
+        let resultlist1 = await this.callAPI(api_request + '/jobs');
 
-                container.insertAdjacentHTML('beforeend', this.printJobList(job_column_names, col_size, data));
-            })
-            .catch((error) => {
-                console.error(error);
-            })
+        let col_size = ["2", "3", "3", "2", "2"];
+        let job_column_names = ["Auswahl", "Start", "Ende", "verarbeite Verzeichnisse", "verarbeitete Dateien"];
+
+        container.insertAdjacentHTML('beforeend', this.printJobList(job_column_names, col_size, resultlist1));
     }
 
+    this.callAPI = async function (str_api_call) {
+        try {
+            let res = await fetch(str_api_call);
+            return await res.json();
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
-    this.getResultList = function (source, target) {
+    this.getResultList = async function (source, target) {
 
         let col_size = ["1", "1", "2", "1", "1", "1", "1", "1", "1", "2"];
         let column_names = ["ID", "Job ID", "Pfad", "Größe", "Hash-Wert", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
 
-        fetch(api_request + '/getdelta/' + source + '/' + target)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
+        let resultlist1 = await this.callAPI(api_request + '/getdelta/' + source + '/' + target);
+        let resultlist2 = await this.callAPI(api_request + '/comparejobs/' + source + '/' + target);
 
-                let deleted_data = [];
-                let created_data = [];
+        let deleted_data = [];
+        let created_data = [];
 
-                for (let i = 0; i <= data.length - 1; i++) {
-                    if (data[i].job_id.toString() === source) {
-                        deleted_data.push(data[i])
-                    } else {
-                        created_data.push(data[i])
-                    }
-                }
-
-                if (created_data.length > 0) {
-                    this.addHeadLine("createdData", "Neue Elemente:", "#container");
-                    let html1 = this.printResultList(column_names, col_size, "tbl_created", "#createdData", created_data);
-                    document.querySelector("#createdData").insertAdjacentHTML('beforeend', html1);
-                }
-                if (deleted_data.length > 0) {
-                    this.addHeadLine("deletedData", "Gelöschte Elemente:", "#container");
-                    let html2 = this.printResultList(column_names, col_size, "tbl_deleted", "#deletedData", deleted_data);
-                    document.querySelector("#deletedData").insertAdjacentHTML('beforeend', html2);
-                }
-            })
-            .catch((error) => {
-                console.error(error);
+        for (let i = 0; i <= resultlist1.length - 1; i++) {
+            if (resultlist1[i].job_id.toString() === source) {
+                deleted_data.push(resultlist1[i])
+            } else {
+                created_data.push(resultlist1[i])
             }
-        )
+        }
 
-         fetch(api_request + '/comparejobs/' + source + '/' + target)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
-                let changed_data = [];
+        if (created_data.length > 0) {
+            this.addHeadLine("createdData", "Neue Elemente:", "#container");
+            let html1 = this.printResultList(column_names, col_size, "tbl_created", "#createdData", created_data);
+            document.querySelector("#createdData").insertAdjacentHTML('beforeend', html1);
+        }
+        if (deleted_data.length > 0) {
+            this.addHeadLine("deletedData", "Gelöschte Elemente:", "#container");
+            let html2 = this.printResultList(column_names, col_size, "tbl_deleted", "#deletedData", deleted_data);
+            document.querySelector("#deletedData").insertAdjacentHTML('beforeend', html2);
+        }
 
-                for (let i = 0; i <= data.length - 1; i++) {
-                        changed_data.push(data[i])
-                }
-
-                if (changed_data.length > 0) {
-                    this.addHeadLine("changedData", "Geänderte Elemente:", "#container");
-                    let html = this.printResultList(column_names, col_size, "tbl_changed", "#changedData", changed_data);
-                    document.querySelector("#changedData").insertAdjacentHTML('beforeend', html);
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-            }
-        )
-
+        if (resultlist2.length > 0) {
+            this.addHeadLine("changedData", "Geänderte Elemente:", "#container");
+            let html = this.printResultList(column_names, col_size, "tbl_changed", "#changedData", resultlist2);
+            document.querySelector("#changedData").insertAdjacentHTML('beforeend', html);
+        }
     }
 
     this.printJobList = function (cols, col_size, data) {
@@ -94,7 +69,6 @@ function vat4lApp() {
         for (let i = 0; i <= cols.length - 1; i++) {
             this.printHeader(cols[i], col_size[i], "#job_header")
         }
-
         let html = ``;
 
         for (let i = 0; i < data.length; i++) {
@@ -108,7 +82,6 @@ function vat4lApp() {
                 this.printCol("text", "text-center", job.int_processed_file, col_size[4])}
                  </div>
                 `;
-            //container.insertAdjacentHTML('beforeend', html)
         }
 
         return html;
@@ -206,8 +179,6 @@ function vat4lApp() {
 
         return html;
     }
-
-
 }
 
 function getSelectedJobs() {
@@ -243,6 +214,6 @@ function clearContent() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    app = new vat4lApp();
+    app = new Vat4lApp();
     app.init();
-});
+})
