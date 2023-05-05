@@ -5,7 +5,8 @@ function Vat4lApp() {
 
     this.init = function () {
         container = document.querySelector("#container")
-        this.getJobList();
+        // this.getJobList();
+        this.getByPath();
     }
 
     this.getJobList = async function () {
@@ -179,6 +180,28 @@ function Vat4lApp() {
 
         return html;
     }
+
+    this.getByPath = async function () {
+        let pathlist =[];
+        pathlist = await this.callAPI(api_request + '/getpathlist');
+
+        let optionlist = [];
+        for (i = 0 ; i < pathlist.length-1 ; i++) {
+            optionlist.push(`<option value="${pathlist[i].id}">${pathlist[i].path}</option>`)
+        }
+
+        let html= `
+            <div>
+                <p>Bitte wählen Sie einen Pfad aus der Liste aus:</p>
+                    <select id="path">
+                        ${optionlist.toString()}"
+                    </select>
+                    <button type="button" class="btn-primary" onclick="getFileList()">Ausführen</button>
+            </div>
+        `
+
+         container.insertAdjacentHTML('beforeend', html);
+    }
 }
 
 function getSelectedJobs() {
@@ -211,6 +234,22 @@ function showJobList() {
 
 function clearContent() {
     document.querySelector("#container").innerHTML = "";
+}
+
+function showByPath() {
+     clearContent();
+
+}
+
+async function getFileList() {
+
+    let selectedPathID= document.getElementById('path').value;
+    alert (selectedPathID);
+    let col_size = ["1", "1", "2", "1", "1", "1", "1", "1", "1", "2"];
+    let column_names = ["ID", "Job ID", "Pfad", "Größe", "Hash-Wert", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
+
+    let resultlist = await this.callAPI(api_request + '/getfilebypath/' + selectedPathID);
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {

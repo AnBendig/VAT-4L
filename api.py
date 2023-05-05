@@ -84,3 +84,18 @@ async def get_delta_jobs(source_id: int, target_id : int):
     result = sql_connector.readData(str_query)
 
     return result
+
+@application.get("/vat4l-api/getpathlist")
+async def get_path_list() :
+    str_query : str = "SELECT DISTINCT path, id FROM tbl_scan WHERE is_directory=TRUE GROUP BY path"
+    result = sql_connector.readData(str_query)
+
+    return result
+
+
+@application.get("/vat4l-api/getfilebypath/{selectedPathID}")
+async def get_path_list(selectedPathID) :
+    str_query : str = "SELECT * FROM tbl_scan WHERE is_directory=FALSE AND job_id=8 AND path=CONCAT((SELECT d.path FROM tbl_scan as d WHERE d.id=" + selectedPathID + "),'/',file_name) GROUP BY hash"
+    result = sql_connector.readData(str_query)
+
+    return result
