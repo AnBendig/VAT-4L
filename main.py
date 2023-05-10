@@ -14,7 +14,7 @@ Config.load()
 
 # Prüfen, ob Konfiguration geladen werden konnte/gefüllt ist
 if Config.bol_is_configuration_needed:
-    print("Bitte öffnen Sie die Konfiguration, tragen die notwendigen Daten ein und speichern diese.")
+    print(str(datetime.now()) + "Bitte öffnen Sie die Konfiguration, tragen die notwendigen Daten ein und speichern diese.")
     exit(1010)
 
 #Verbiundung zur Datenbank herstellen
@@ -49,7 +49,7 @@ current_job.endJob(sql_connector)
 # Überprüfung durchführen, ob der aktuelle Job mit dem vorherigem inhaltlich identisch ist
 if (current_job.is_equal_to_previous(sql_connector,int_last_job_id)) :
     # Job ist identisch und kann gelöscht werden
-    print("Job " + str(current_job.job_id) + " ist identisch mit vorherigem Lauf (Job " + str(int_last_job_id) + "). Daten werden gelöscht.")
+    print(str(datetime.now()) + ": Job " + str(current_job.job_id) + " ist identisch mit vorherigem Lauf (Job " + str(int_last_job_id) + "). Daten werden gelöscht.")
     current_job.delete_job(sql_connector)
 else:
     # Ausgabe der Verarbeitung
