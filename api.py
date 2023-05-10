@@ -1,10 +1,8 @@
-import json
 import os
 
 from fastapi import FastAPI
-from json import dumps
 from model.Configuration import Configuration
-from model.SQLConnect import SQLConnect
+from control.SQLConnect import SQLConnect
 from fastapi.middleware.cors import CORSMiddleware
 
 appPath : str = os.path.dirname(__file__)

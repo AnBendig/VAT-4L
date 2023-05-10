@@ -1,47 +1,45 @@
 import os
 from model.DirectoryEntry import DirectoryEntry
 from model.FileEntry import FileEntry
-from model.Configuration import Configuration
-from model.SQLConnect import SQLConnect,SQLQueryComposer,SQLQueryType
+from control.SQLConnect import SQLQueryComposer,SQLQueryType
 from model.Job import Job
+from control.Application import Application
 
 class DirectoryScanner:
     """
     Klasse zur Verarbeitung der Verzeichnisstruktur ausgehend vom definierten ROOT-Verzeichnis aus der Konfigurationsdatei.
     """
 
-    def __init__(self, config: Configuration, sql_connector: SQLConnect , current_job: Job):
+    def __init__(self, application : Application):
         """
         Erstellt ein Objekt der Klasse.
 
-        :param config:
-            Configuration. Verwaltung der Anwendungsparameter
-        :param sql_connector:
-            SQLConnection. Verbindung zur Datenbank.
-        :param current_job:
-            Job. Der aktuelle Vorgang zum Scan der Verzeichnisstruktur.
+        :param application:
+            Application. Globales Anwendungsobjekt
         """
-        self._Config: Configuration = config
-        self._sql_connector: SQLConnect= sql_connector
+       # self._Config: Configuration = config
+        self._App = application
+        # self._sql_connector: SQLConnect= sql_connector
         self._FolderList: list = []   # Liste der zu untersuchenden Verzeichnisse
-        self._FolderList.append(self._Config.str_root_folder) # Fügt das Wurzelverzeichnis der Liste hinzu
-        self._currentJob: Job = current_job
+        self._FolderList.append(self._App.Config.str_root_folder) # Fügt das Wurzelverzeichnis der Liste hinzu
+        self._currentJob: Job = None
 
-    def startScan(self):
+    def start_scan(self, job : Job):
         """
         Startet den Scan der Verzeichnisse und speicher die Ergebnisse in der Datenbank
-
+        :param job:
+            Job. Der aktuelle Vorgang zum Scan der Verzeichnisstruktur.
         :return:
             Keine Rückgabe.
         """
+        self._currentJob = job
 
         # Initialisiere die Zähler für Verzeichnisse und Dateien
         int_file_counter: int = 0
         int_dir_counter:int =0
 
-
         if len(self._FolderList) > 0:
-            # Liste enthält zu verarbeitenden Verzeichnisse --> lade das erste Element aus der Liste
+            # Liste enthält zu verarbeitenden Verzeichnisse → lade das erste Element aus der Liste
             str_current_folder = next(iter(self._FolderList), None)
 
             while str_current_folder is not None:
@@ -56,7 +54,7 @@ class DirectoryScanner:
                             # Element ist ein Ordner, aber kein SymLink
 
                             # Erstelle Verzeichnis-Objekt und initialisiere dieses
-                            my_dir: DirectoryEntry = DirectoryEntry(self._Config)
+                            my_dir: DirectoryEntry = DirectoryEntry(self._App.Config)
                             my_dir.readEntry(entry)
 
                             # Überprüfung, ob das aktuelle Verzeichnis schon in der Bearbeitungsliste vorhanden ist.
@@ -67,16 +65,16 @@ class DirectoryScanner:
                                 # Verzeichniszähler um 1 erhöhen
                                 int_dir_counter +=1
 
-                                # Abfrage für das aktuelle Verzeichnis erastellen
+                                # Abfrage für das aktuelle Verzeichnis erstellen
                                 str_query = self._build_query(my_dir)
 
                                 # Übertragung an die Datenbank
-                                self._sql_connector.writeData(str_query)
+                                self._App.Connection.writeData(str_query)
                         else:
                             # Überprüfung, ob Element ein SymLink ist
                             if not entry.is_symlink():
                                 # Element ist eine Datei - Erstelle FileEntry Objekt
-                                my_file: FileEntry = FileEntry(self._Config) # TODO: Reduzierung auf Extensions
+                                my_file: FileEntry = FileEntry(self._App.Config) # TODO: Reduzierung auf Extensions
                                 my_file.readEntry(entry)
 
                                 # Dateizähler um 1 erhöhen
@@ -86,10 +84,10 @@ class DirectoryScanner:
                                 str_query= self._build_query(my_file)
 
                                 # Übertragung der Daten an die Datenbank
-                                self._sql_connector.writeData(str_query)
+                                self._App.Connection.writeData(str_query)
 
                 # Speichern der Daten in der Datenbank
-                self._sql_connector.commit()
+                self._App.Connection.commit()
 
                 # entferne den aktuell verarbeiteten Ordner auf der Verzeichnisliste
                 self._FolderList.remove(str_current_folder)

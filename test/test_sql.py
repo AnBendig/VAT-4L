@@ -1,9 +1,6 @@
 from model.Configuration import Configuration
-from model.SQLConnect import SQLConnect
+from control.SQLConnect import SQLConnect
 from control.JobCompare import JobCompare
-from json import JSONEncoder
-
-import json
 
 Config = Configuration()
 Config.load()
