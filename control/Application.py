@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from model.Configuration import Configuration
 
+
 class Application:
 
     def __init__(self, str_app_path : str):
@@ -37,3 +38,4 @@ class Application:
             exit(1010)
         else:
             return config
+

@@ -1,6 +1,7 @@
 from model.Job import Job
 from control.DirectoryScanner import DirectoryScanner
 from control.Application import Application
+from datetime import datetime
 
 class JobHandler:
 
@@ -10,15 +11,35 @@ class JobHandler:
         # Objekt vom Verzeichnis-Scanner erzeugen
         self._DirectoryScanner : DirectoryScanner = DirectoryScanner(self._App)
 
-    def execute_job(self, job : Job) :
+    def execute_job(self) :
        """
        Führt einen Job aus.
-       :param job: Job. Der auszuführende Job.
        :return: keine Rückgabe.
        """
+       current_job: Job = Job()
+       int_last_job_id: int = self.get_last_jobid()
 
-       # Scan starten
-       self._DirectoryScanner.start_scan(job)
+       # current_job.create_job(sql_connector)
+       current_job.create_job(self._App.Connection)
+
+       # Scan der Verzeichnisse durchführen
+       self._DirectoryScanner.start_scan(current_job)
+
+       # current_job.endJob(sql_connector)
+       current_job.endJob(self._App.Connection)
+
+       # Überprüfung durchführen, ob der aktuelle Job mit dem vorherigem inhaltlich identisch ist
+       if self.is_equal_to_previous(int_last_job_id, current_job.job_id):
+           # Job ist identisch und kann gelöscht werden
+           print(str(datetime.now()) + ": Job " + str(
+               current_job.job_id) + " ist identisch mit vorherigem Lauf (Job " + str(
+               int_last_job_id) + "). Daten werden gelöscht.")
+           self.delete_job(current_job.job_id)
+       else:
+           # Ausgabe der Verarbeitung
+           print(str(datetime.now()) + ": Scan abgeschlossen. Anzahl der gescannten Verzeichnisse/Dateien: " + str(
+               current_job.int_processed_dir) + "/" + str(current_job.int_processed_file) + " - Dauer: " + str(
+               current_job.int_job_duration) + " mics")
 
     def get_last_jobid(self) -> int:
         """
