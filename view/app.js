@@ -14,7 +14,7 @@ Version 0.1
         // Initialisiert ein Objekt der Klasse, legt den Anwendungsbereich
         // auf den Container fest und lädt den ersten Inhalt beim Laden der Seite.
 
-        container = document.querySelector("#container")
+        container = document.querySelector("#container");
         this.getByPath();
     }
 
@@ -31,6 +31,15 @@ Version 0.1
 
         // Schreiben der Daten:
         container.insertAdjacentHTML('beforeend', this.printJobList(job_column_names, col_size, resultlist1));
+
+        let boxes= document.querySelectorAll('input[type="checkbox"]');
+        boxes.forEach(this.addCheckboxListener)
+    }
+
+    this.addCheckboxListener= function(currentValue) {
+        document.addEventListener('change', function() {
+               checkboxSelected(currentValue);
+           })
     }
 
     //--------------------------------------------------------------------
@@ -130,7 +139,6 @@ Version 0.1
                  </div>
                 `;
         }
-
         return html;
     }
 
@@ -308,21 +316,15 @@ function getSelectedJobs() {
     // Liefert eine Liste der ersten zwei ausgewählten Einträge aus der
     // Datenliste zur weiteren Verarbeitung zurück
 
-    let selectedJobs = [-1, -1];
+    let selectedJobs=[];
 
-    let element = document.getElementsByName("selectID");
+    let element=  document.querySelectorAll('input[type="checkbox"]:checked');
 
-    // Durchlaufe alle Einträge und merke die ersten zwei Elemente:
-    for (var i = 0; i <= element.length; i++) {
-        if (element[i].checked) {
-            if (selectedJobs[0] === -1) selectedJobs[0] = element[i].value;
-            else {
-                selectedJobs[1] = element[i].value;
-                return (selectedJobs);
-            }
-        }
-    }
-    return null;
+    // Durchlaufe alle Einträge und merke die ausgewählten IDs:
+    element.forEach(function (currentValue){
+        selectedJobs.push(currentValue.value)
+    })
+     return (selectedJobs);
 }
 
 //--------------------------------------------------------------------
@@ -334,6 +336,7 @@ function showSelectedJobs() {
     clearContent();
 
     app.getResultList(selection[0], selection[1])
+    document.querySelector('#btn_selectedJobs').classList.add('disabled')
 }
 
 //--------------------------------------------------------------------
@@ -366,6 +369,20 @@ async function getFileList() {
     let column_names = ["ID", "Job ID", "Pfad", "Größe", "Hash-Wert", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
 
     let resultlist = await this.callAPI(api_request + '/getfilebypath/' + selectedPathID);
+
+}
+
+function checkboxSelected(source) {
+    let selectedBoxes= document.querySelectorAll('input[type="checkbox"]:checked').length;
+
+    if (selectedBoxes == 2) {
+        document.querySelector('#btn_selectedJobs').classList.remove('disabled')
+    } else if (selectedBoxes >2 ) {
+        source.checked=false;
+        document.querySelector('#btn_selectedJobs').classList.add('disabled')
+    } else {
+        document.querySelector('#btn_selectedJobs').classList.add('disabled')
+    }
 
 }
 
