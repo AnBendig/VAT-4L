@@ -78,3 +78,56 @@ class Job():
         """
         diff: timedelta = self.dt_job_end - self.dt_job_start
         return diff.microseconds
+
+    def get_last_jobid (self, sql_connection: SQLConnect) -> int:
+        str_query : str= "SELECT MAX(id_job) FROM tbl_job"
+        result= sql_connection.readData(str_query)
+        t : tuple= result[0]
+        return result[0][0]
+
+    def is_equal_to_previous (self, sql_connection : SQLConnect, int_previous_job_id : int) -> bool:
+        """
+        Vergleicht zwei Jobs miteinander und prüft, ob es Unterschiede zum vorherigem Job gibt.
+
+        :param sql_connection: SQLConnect. Verbindung zur Datenbank.
+        :param int_previous_job_id: Integer. Die Job-ID des vorherigen Jobs.
+        :return: Boolean. Liefert Wahr, wenn beide Jobs identisch sind.
+        """
+        # Starte Überprüfung auf Änderungen von Dateien zwischen den Jobs
+        bol_is_equal :bool = False
+        str_query = "SELECT t.* FROM tbl_scan AS s JOIN tbl_scan AS t ON s.path=t.path WHERE s.job_id=" + str(int_previous_job_id) + " AND t.job_id=" + str(self.job_id) + " AND (s.hash!=t.hash OR s.user_id!=t.user_id OR s.group_id!=t.group_id OR s.filemode!=t.filemode)"
+        result = sql_connection.readData(str_query)
+
+        if (len(result) == 0) :
+            # Falls die Abfrage auf Äderungen kein Ergebniss liefert, wird geprüft,
+            # ob Dateien hinzugefügt oder gelöscht worden sind.
+            str_query = "SELECT * FROM ( SELECT * FROM tbl_scan s WHERE s.job_id=" + str(int_previous_job_id) + " UNION ALL SELECT * FROM tbl_scan t WHERE t.job_id=" + str(self.job_id) + ") tbl_scan GROUP BY path HAVING COUNT(*) = 1"
+            result = sql_connection.readData(str_query)
+            if (len(result) == 0) :
+                # Es wurden keine Dateien hinzugefügt oder gelöscht → Jobs sind inhaltlich identisch
+                bol_is_equal = True
+
+        return bol_is_equal
+
+    def delete_job(self, sql_connection : SQLConnect) :
+        """
+        Löscht einen Job aus der Datenbank.
+
+        :param sql_connection: SQLConnect. Verbindung zur Datenbank.
+        :return: void.
+        """
+
+        # Lösche alle Dateien und Verzeichnisse des aktuellen Jobs aus der Datenbank
+        str_query :str= "DELETE FROM tbl_scan WHERE job_id=" + str(self.job_id)
+        sql_connection.writeData(str_query)
+
+        # Lösche den aktuellen Job aus der Datenbank
+        str_query: str = "DELETE FROM tbl_job WHERE id_job=" + str(self.job_id)
+        sql_connection.writeData(str_query)
+
+        # Setze den Zähler für das AUTO_INCREMENT zurück, um kontinuierliche Jobnummern zu erzeugen
+        str_query: str = "ALTER TABLE tbl_job AUTO_INCREMENT = " + str(self.job_id)
+        sql_connection.writeData(str_query)
+
+        # Schreiben der Daten
+        sql_connection.commit()

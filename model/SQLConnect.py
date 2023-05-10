@@ -41,7 +41,8 @@ class SQLConnect:
                 database= str_database)
 
         except Exception as ex:
-            print("Verbindung zum Server konnte nicht hergestellt werden:" + getattr(ex,'msg'))
+            print(str(datetime.now()) + ": Verbindung zum Server konnte nicht hergestellt werden:" + getattr(ex,'msg'))
+            print("User: " + str_user + "  Pw: " + str_password + "  Host: " + str_server + "  Port: " + str_port + "  DB: " + str_database)
             #  TODO: Make Log Entry
             exit(1012)
 
@@ -71,9 +72,9 @@ class SQLConnect:
 
     def readData(self, str_query: str) -> dict:
         """
-        Nicht implemnentiert!
-        :param str_query:
-        :return:
+        Führt eine Abfrag aus und liefert das Egebnis zurück.
+        :param str_query - String. SQL-Anweisung des SELECT-Befehls
+        :return Dictionary. Das Ergebnis der übergebenen SQL-Abfrage
         """
 
         self._sql_cursor.execute(str_query)

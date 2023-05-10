@@ -10,7 +10,7 @@ class Configuration:
     Erstellt:   30.03.2023
     Version:    0.1
     """
-    def __init__(self):
+    def __init__(self, appPath : str):
         """
         Initialisiert ein Objekt dieser Klasse.
         """
@@ -24,6 +24,8 @@ class Configuration:
         self.str_db_user = None         # Benutzername der Datenbank
         self.str_db_password = None     # Passwort des verwendeten Benutzers TODO: Verschlüsselt ablegen
         self.str_db_port = ""           # Port für den Zugriff auf die Datenbank
+        self.str_appPath = appPath      # Anwendungspfad
+        self.str_configPath= self.str_appPath + '/config.ini' # Pfad zur Konfigurationsdatei
 
         self.bol_is_configuration_needed = True    # Konfiguration muss eingestellt werden
 
@@ -36,10 +38,10 @@ class Configuration:
         """
 
         # Überprüfung, ob Konfigurationsdatei im Anwendungsverzeichnis vorhanden ist
-        if exists('config.ini'):
+        if exists(self.str_configPath):
             # Konfigurationsdatei vorhanden
             config = ConfigParser()
-            config.read('config.ini')
+            config.read(self.str_configPath)
 
             # Lesen der ROOT-Parameter
             self.str_system = config["ROOT"]["system"]
@@ -59,10 +61,10 @@ class Configuration:
             self.bol_is_configuration_needed = False    # Konfiguration erfolgreich gelesen - keine Konfiguration notwendig.
         else:
             # Konfigurationsdatei nicht vorhanden, erstelle eine neue, leere Datei im Anwendungsverzeichnis.
-            self.createConfigFile()
+            self.createConfigFile(self.str_configPath)
 
     @staticmethod
-    def createConfigFile():
+    def createConfigFile(str_configPath : str):
         """
         Methode erstellt eine neue, mit Basiswerten gefüllte Konfigurationsdatei.
         :return:
@@ -88,5 +90,5 @@ class Configuration:
         }
 
         # Schreiben der Daten in die Datei
-        with open("config.ini", "w") as f:
+        with open(str_configPath, "w") as f:
             config.write(f)
