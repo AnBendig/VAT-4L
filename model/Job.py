@@ -46,7 +46,7 @@ class Job:
         sql_connection.writeData(str_query)     # Übertragen der Daten in die Datenbank
         sql_connection.commit()                 # Speichern der Daten
 
-    def create_job(self, sql_connection: SQLConnect) -> bool:
+    def init_job(self, sql_connection: SQLConnect) -> bool:
         """
          Erfasst der Startzeitpunkt des Scans und schreibt diese Informationen in die Datenbank
         :param sql_connection:

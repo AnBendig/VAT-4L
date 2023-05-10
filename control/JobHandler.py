@@ -4,8 +4,14 @@ from control.Application import Application
 from datetime import datetime
 
 class JobHandler:
-
+    """
+    Führt Funktionen für einen oder mehrere Jobs aus und verwaltet diese.
+    """
     def __init__(self, application : Application):
+        """
+        Erstellt ein Objekt dieser Klasse
+        :param application: Application. Enthält die Anwendungsparameter für die Verarbeitung.
+        """
         self._App : Application = application
 
         # Objekt vom Verzeichnis-Scanner erzeugen
@@ -16,16 +22,16 @@ class JobHandler:
        Führt einen Job aus.
        :return: keine Rückgabe.
        """
-       current_job: Job = Job()
+
        int_last_job_id: int = self.get_last_jobid()
 
-       # current_job.create_job(sql_connector)
-       current_job.create_job(self._App.Connection)
+       # Erstelle einen neuen Job
+       current_job: Job = Job()
+       current_job.init_job(self._App.Connection)
 
        # Scan der Verzeichnisse durchführen
        self._DirectoryScanner.start_scan(current_job)
 
-       # current_job.endJob(sql_connector)
        current_job.endJob(self._App.Connection)
 
        # Überprüfung durchführen, ob der aktuelle Job mit dem vorherigem inhaltlich identisch ist
