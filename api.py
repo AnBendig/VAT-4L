@@ -87,7 +87,11 @@ async def get_compare_jobs(source_id : int, target_id : int):
     :return: Dictionary. Liefert eine Liste aller unterschiedlichen Dateien zurück.
     """
 
-    str_query= "SELECT t.* FROM tbl_scan AS s JOIN tbl_scan AS t ON s.path=t.path WHERE s.job_id="+str(source_id)+" AND t.job_id="+str(target_id)+" AND (s.hash!=t.hash OR s.user_id!=t.user_id OR s.group_id!=t.group_id OR s.filemode!=t.filemode)"
+    # str_query= "SELECT t.* FROM tbl_scan AS s JOIN tbl_scan AS t ON s.path=t.path WHERE s.job_id="+str(source_id)+" AND t.job_id="+str(target_id)+" AND (s.hash!=t.hash OR s.user_id!=t.user_id OR s.group_id!=t.group_id OR s.filemode!=t.filemode)"
+    str_query = "SELECT t.path as path,	t.size as size, s.size as s_size, t.group_name as group_name, s.group_name as s_group_name, t.user_name as user_name, s.user_name as s_user_name, t.filemode as filemode, s.filemode as s_filemode, t.created_date as created_date, s.created_date as s_created_date, t.modified_date as modified_date, s.modified_date as s_modified_date" \
+                " FROM tbl_scan AS s JOIN tbl_scan AS t ON s.path=t.path WHERE s.job_id=" + str(
+        source_id) + " AND t.job_id=" + str(
+        target_id) + " AND (s.hash!=t.hash OR s.user_id!=t.user_id OR s.group_id!=t.group_id OR s.filemode!=t.filemode)"
     result = sql_connector.readData(str_query)
 
     return result

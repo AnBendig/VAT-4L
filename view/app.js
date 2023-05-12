@@ -2,13 +2,13 @@ let container = "";
 let api_request = "http://practice.test7.bmsoft.de:8000/vat4l-api";
 
 function Vat4lApp() {
-/* **********************************************************************
-Klasse zur Steuerung und Bereitstellung der Funktionalität der Anwendung
+    /* **********************************************************************
+    Klasse zur Steuerung und Bereitstellung der Funktionalität der Anwendung
 
-Stand: 08.05.2023
-Author: Andreas Bendig
-Version 0.1
-********************************************************************** */
+    Stand: 08.05.2023
+    Author: Andreas Bendig
+    Version 0.1
+    ********************************************************************** */
 
     this.init = function () {
         // Initialisiert ein Objekt der Klasse, legt den Anwendungsbereich
@@ -32,14 +32,14 @@ Version 0.1
         // Schreiben der Daten:
         container.insertAdjacentHTML('beforeend', this.printJobList(job_column_names, col_size, resultlist1));
 
-        let boxes= document.querySelectorAll('input[type="checkbox"]');
+        let boxes = document.querySelectorAll('input[type="checkbox"]');
         boxes.forEach(this.addCheckboxListener)
     }
 
-    this.addCheckboxListener= function(currentValue) {
-        document.addEventListener('change', function() {
-               checkboxSelected(currentValue);
-           })
+    this.addCheckboxListener = function (currentValue) {
+        document.addEventListener('change', function () {
+            checkboxSelected(currentValue);
+        })
     }
 
     //--------------------------------------------------------------------
@@ -64,8 +64,8 @@ Version 0.1
         //          target - String. ID des zweiten Jobs, mit dem die Quelle verglichen wird
 
         // Festlegung der Spalten-Werte unf Überschriften:
-        let col_size = ["1", "1", "2", "1", "1", "1", "1", "1", "1", "2"];
-        let column_names = ["ID", "Job ID", "Pfad", "Größe", "Hash-Wert", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
+        let col_size = ["4", "1", "1", "1", "1", "2", "2"];
+        let column_names = ["Pfad", "Größe", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
 
         // Durchführung der API-Aufrufe
         let resultlist1 = await this.callAPI(api_request + '/getdelta/' + source + '/' + target);
@@ -73,16 +73,57 @@ Version 0.1
 
         let deleted_data = [];
         let created_data = [];
+        let changed_data = [];
 
         // Trennung von neuen und gelöschten Elementen in separate
         // Ausgabeblöcke auf dem Bildschirm.
 
         for (let i = 0; i <= resultlist1.length - 1; i++) {
+
+            let data_source= new ResultlistRow();
+            let data_target = new ResultlistRow();
+
+            data_source.id = i;
+            data_source.path = resultlist1[i].path;
+            data_target.id = i;
+
+            let datablock =[];
+
             if (resultlist1[i].job_id.toString() === source) {
-                deleted_data.push(resultlist1[i])
+                // Datensatz wurde gelöscht
+                data_source.init(resultlist1[i]);
+                datablock = {data_source, data_target}
+
+                deleted_data.push(datablock)
             } else {
-                created_data.push(resultlist1[i])
+                data_target.init(resultlist1[i])
+                datablock = {data_source, data_target}
+
+                created_data.push(datablock)
             }
+        }
+
+        for (let i = 0; i <= resultlist2.length - 1; i++) {
+
+            let datablock =[];
+            let data_source= new ResultlistRow();
+            let data_target = new ResultlistRow();
+
+            data_source.id = i;
+            data_target.id = i;
+
+            data_target.init(resultlist2[i]);
+
+            data_source.path= resultlist2[i].path;
+            data_source.size= resultlist2[i].s_size;
+            data_source.username= resultlist2[i].s_user_name;
+            data_source.groupname= resultlist2[i].s_group_name;
+            data_source.filemode= resultlist2[i].s_filemode;
+            data_source.created_date= resultlist2[i].s_created_date;
+            data_source.modified_date= resultlist2[i].s_modified_date;
+
+            datablock = {data_source, data_target}
+            changed_data.push(datablock)
         }
 
         //Ausgabe der Ergebnisse auf dem Bildschirm:
@@ -101,7 +142,7 @@ Version 0.1
         // Unterschiedliche Inhalte
         if (resultlist2.length > 0) {
             this.addHeadLine("changedData", "Geänderte Elemente:", "#container");
-            let html = this.printResultList(column_names, col_size, "tbl_changed", "#changedData", resultlist2);
+            let html = this.printResultList(column_names, col_size, "tbl_changed", "#changedData", changed_data);
             document.querySelector("#changedData").insertAdjacentHTML('beforeend', html);
         }
     }
@@ -131,11 +172,11 @@ Version 0.1
             // Füge für jeden Datensatz eine Zeile mit den Informationen hinzu
             html += `
                  <div class="row" id="job-element-${job.id_job}">${
-                this.printCol("checkbox", "text-center", job.id_job, col_size[0]) +
-                this.printCol("date", "text-center", job.dt_start_job, col_size[1]) +
-                this.printCol("date", "text-center", job.dt_end_job, col_size[2]) +
-                this.printCol("text", "text-center", job.int_processed_dir, col_size[3]) +
-                this.printCol("text", "text-center", job.int_processed_file, col_size[4])}
+                this.printCol("checkbox", "text-center", job.id_job, null, col_size[0]) +
+                this.printCol("date", "text-center", job.dt_start_job, null, col_size[1]) +
+                this.printCol("date", "text-center", job.dt_end_job, null, col_size[2]) +
+                this.printCol("text", "text-center", job.int_processed_dir, null, col_size[3]) +
+                this.printCol("text", "text-center", job.int_processed_file, null, col_size[4])}
                  </div>
                 `;
         }
@@ -157,7 +198,7 @@ Version 0.1
     }
 
     //--------------------------------------------------------------------
-    this.printResultList = function (cols, col_size, str_headerID, str_parentID, data) {
+    this.printResultList = function (cols, col_size, str_headerID, str_parentID, datablock) {
         // Generiert den HTML-Code der ermittelten Dateiinformationen
         // @param:  cols - String[]. Spaltenüberschriften von links nach rechts
         //          col-size - String[]. Breite der einzelnen Spalten im Bootstrap
@@ -177,21 +218,21 @@ Version 0.1
         let html = ``;
 
         // Ermittle den HTML-Code je Datenzeile:
-        for (let i = 0; i <= data.length - 1; i++) {
-            let element = data[i];
+        for (let i = 0; i <= datablock.length - 1; i++) {
+            let element = datablock[i];
 
             html += `
-                         <div class="row" id="job-element-${element.id_job}">${
-                this.printCol("text", "text-center", element.id, col_size[0]) +
-                this.printCol("text", "text-center", element.job_id, col_size[1]) +
-                this.printCol("text", "text-start", element.path, col_size[2]) +
-                this.printCol("text", "text-center", element.size, col_size[3]) +
-                this.printCol("text", "text-center", element.hash, col_size[4]) +
-                this.printCol("text", "text-center", element.user_name, col_size[5]) +
-                this.printCol("text", "text-center", element.group_name, col_size[6]) +
-                this.printCol("text", "text-center", element.filemode, col_size[7]) +
-                this.printCol("date", "text-center", element.created_date, col_size[8]) +
-                this.printCol("date", "text-center", element.modified_date, col_size[9])
+                         <div class="row" id="job-element-${element.data_source.id}">${
+                // this.printCol("text", "text-center", element.id, col_size[0]) +
+                // this.printCol("text", "text-center", element.job_id, col_size[1]) +
+                this.printCol("text", "text-start", element.data_source.path, null, col_size[0]) +
+                this.printCol("text", "text-center", element.data_source.size, element.data_target.size, col_size[1]) +
+                //this.printCol("text", "text-center", element.hash, col_size[4]) +
+                this.printCol("text", "text-center", element.data_source.username, element.data_target.username, col_size[2]) +
+                this.printCol("text", "text-center", element.data_source.groupname, element.data_target.groupname, col_size[3]) +
+                this.printCol("text", "text-center", element.data_source.filemode, element.data_target.filemode, col_size[4]) +
+                this.printCol("date", "text-center", element.data_source.created_date, element.data_target.created_date, col_size[5]) +
+                this.printCol("date", "text-center", element.data_source.modified_date, element.data_target.modified_date, col_size[6])
             }
                          </div>
                         `;
@@ -231,7 +272,7 @@ Version 0.1
     }
 
     //--------------------------------------------------------------------
-    this.printCol = function (type, align, field, size) {
+    this.printCol = function (type, align, s_field, t_field, size) {
         // Schreibt Daten in eine Zelle der Tabellenstruktur
         // @param:  type - String. darf einen der nachfolgenden Werte enthalten:
         //                      - checkbox, date, text (default)
@@ -242,7 +283,7 @@ Version 0.1
         //                      wieviele Spalten optisch zu einer zusammengefasst werden.
 
         let html;
-
+        let content = ""
         switch (type) {
 
             case "checkbox":
@@ -251,8 +292,8 @@ Version 0.1
                         <div class="input-group mb-3">
                           <div class="input-group-text small">
                             <span class="${align}">
-                                <input class="form-check-input mt-0" type="checkbox" id="selectID${field}" name="selectID" ="${field}" value="${field}">
-                                <label for="selectID${field}">&nbsp;${field}</label> 
+                                <input class="form-check-input mt-0" type="checkbox" id="selectID${s_field}" name="selectID" ="${s_field}" value="${s_field}">
+                                <label for="selectID${s_field}">&nbsp;${s_field}</label> 
                             </span>
                           </div>
                        </div>
@@ -260,19 +301,32 @@ Version 0.1
                 break;
 
             case "date":
+                if (t_field !== null) {
+                    content = (s_field !== t_field) ? `<span>/ ${(t_field.replace("T", " - "))}</span>` : ``
+                } else {
+                    content = ``
+                }
+
                 //schreibt einen Datums-/Zeitwert:
                 html = `<div class="col-sm-${size}">
                     <div class="${align} small">
-                        ${field.replace("T", " - ")}
+                        <span>${(s_field.replace("T", " - "))}</span> ` + content + `
                     </div>
                 </div>`;
                 break;
 
             default:
                 // Schreibt einen Text:
-                html = ` <div class="col-sm-${size}">
-                    <div class="${align} small">
-                         ${field}
+                if (t_field !== null) {
+                    content = (s_field !== t_field) ? `<span>/ ${t_field}</span>` : ``
+                } else {
+                    content = ``
+                }
+
+
+                html = `<div class="col-sm-${size}">
+                     <div class="${align} small"> 
+                         <span>${s_field}</span> ` + content + `
                     </div>
                 </div>`;
 
@@ -292,12 +346,12 @@ Version 0.1
 
         // Optionsliste für das Selektionsfeld erstellen:
         let optionlist = [];
-        for (i = 0 ; i < pathlist.length-1 ; i++) {
+        for (i = 0; i < pathlist.length - 1; i++) {
             optionlist.push(`<option value="${pathlist[i].id}">${pathlist[i].path}</option>`)
         }
 
         // Auswahlfeld generieren und im Container einbinden:
-        let html= `
+        let html = `
             <div>
                 <p>Bitte wählen Sie einen Pfad aus der Liste aus:</p>
                     <select id="path">
@@ -307,7 +361,45 @@ Version 0.1
             </div>
         `
 
-         container.insertAdjacentHTML('beforeend', html);
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    class ResultlistRow {
+        constructor() {
+            this.id=0
+            this.path="";
+            this.size=0;
+            this.username="-";
+            this.groupname="-";
+            this.filemode="-";
+            this.created_date="-";
+            this.modified_date="-";
+        }
+
+        init (dataset) {
+            this.path= dataset.path;
+            this.size= dataset.size;
+            this.username= dataset.user_name;
+            this.groupname= dataset.group_name;
+            this.filemode= dataset.filemode;
+            if (dataset.created_date !== "-") {
+                this.created_date= this._prepareDate(dataset.created_date);
+            }
+             if (dataset.modified_date !== "-") {
+                this.modified_date= this._prepareDate(dataset.modified_date);
+            }
+        }
+
+        _prepareDate (datetime_value) {
+            var elements= datetime_value.split("T");
+            var date_elements= elements[0].split("-");
+            var time_elements= elements[1].split(":");
+
+            let date= new Date(date_elements[0], date_elements[1]-1, date_elements[2],time_elements[0], time_elements[1], time_elements[2]);
+            return date.toLocaleDateString() + " "+ date.toLocaleTimeString();
+        }
+
+
     }
 }
 
@@ -316,15 +408,15 @@ function getSelectedJobs() {
     // Liefert eine Liste der ersten zwei ausgewählten Einträge aus der
     // Datenliste zur weiteren Verarbeitung zurück
 
-    let selectedJobs=[];
+    let selectedJobs = [];
 
-    let element=  document.querySelectorAll('input[type="checkbox"]:checked');
+    let element = document.querySelectorAll('input[type="checkbox"]:checked');
 
     // Durchlaufe alle Einträge und merke die ausgewählten IDs:
-    element.forEach(function (currentValue){
+    element.forEach(function (currentValue) {
         selectedJobs.push(currentValue.value)
     })
-     return (selectedJobs);
+    return (selectedJobs);
 }
 
 //--------------------------------------------------------------------
@@ -343,7 +435,7 @@ function showSelectedJobs() {
 function showJobList() {
     // Zeigt die Liste aller verfügbaren Jobs an.
 
-     // Oberfläche zurücksetzen:
+    // Oberfläche zurücksetzen:
     clearContent();
     app.getJobList();
 }
@@ -356,14 +448,14 @@ function clearContent() {
 
 //--------------------------------------------------------------------
 function showByPath() {
-     clearContent();
-
+    clearContent();
+    this.getByPath();
 }
 
 //--------------------------------------------------------------------
 async function getFileList() {
 
-    let selectedPathID= document.getElementById('path').value;
+    let selectedPathID = document.getElementById('path').value;
 
     let col_size = ["1", "1", "2", "1", "1", "1", "1", "1", "1", "2"];
     let column_names = ["ID", "Job ID", "Pfad", "Größe", "Hash-Wert", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
@@ -373,12 +465,12 @@ async function getFileList() {
 }
 
 function checkboxSelected(source) {
-    let selectedBoxes= document.querySelectorAll('input[type="checkbox"]:checked').length;
+    let selectedBoxes = document.querySelectorAll('input[type="checkbox"]:checked').length;
 
-    if (selectedBoxes == 2) {
+    if (selectedBoxes === 2) {
         document.querySelector('#btn_selectedJobs').classList.remove('disabled')
-    } else if (selectedBoxes >2 ) {
-        source.checked=false;
+    } else if (selectedBoxes > 2) {
+        source.checked = false;
         document.querySelector('#btn_selectedJobs').classList.add('disabled')
     } else {
         document.querySelector('#btn_selectedJobs').classList.add('disabled')
