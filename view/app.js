@@ -70,6 +70,8 @@ function Vat4lApp() {
         // Durchführung der API-Aufrufe
         let resultlist1 = await this.callAPI(api_request + '/getdelta/' + source + '/' + target);
         let resultlist2 = await this.callAPI(api_request + '/comparejobs/' + source + '/' + target);
+        let job_source = await this.callAPI(api_request + '/getjob/' + source);
+        let job_target = await this.callAPI(api_request + '/getjob/' +target);
 
         let deleted_data = [];
         let created_data = [];
@@ -125,6 +127,17 @@ function Vat4lApp() {
             datablock = {data_source, data_target}
             changed_data.push(datablock)
         }
+        let html_compinfo =
+            `<div>
+                <p>Es wurden die Jobs mit den ID's ${job_source[0].id_job} von ${job_source[0].dt_end_job} und ${job_target[0].id_job} vom ${job_target[0].dt_end_job} miteinander verglichen. Dabei wurden folgende Unterschiede vom System erkannt:</p>
+                <ul>
+                    <li>Es wurden ` + created_data.length + ` neue Dateien gefunden</li>
+                    <li>` + deleted_data.length + ` Dateien wurden aus den Verzeichnissen entfernt</li>
+                    <li>Es sind ` + changed_data.length + ` Anpassungen in Dateien vorgenommen worden</li>    
+                </ul> 
+             </div>`
+
+         document.querySelector("#container").insertAdjacentHTML('beforeend', html_compinfo);
 
         //Ausgabe der Ergebnisse auf dem Bildschirm:
         // Neue Inhalte:
