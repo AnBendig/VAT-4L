@@ -15,7 +15,8 @@ function Vat4lApp() {
         // auf den Container fest und lädt den ersten Inhalt beim Laden der Seite.
 
         container = document.querySelector("#container");
-        this.getByPath();
+        //this.getByPath();
+        this.getJobList();
     }
 
     //--------------------------------------------------------------------
@@ -45,7 +46,7 @@ function Vat4lApp() {
     //--------------------------------------------------------------------
     this.callAPI = async function (str_api_call) {
         // Führt einen API-Aufruf aus und liefert das Ergebnis zurück
-        // @param:  str_api_call    - String. Fertige URL des gewünschten API-Aufrufes mit
+        // @param:  str_api_call    - String. Fertige URL des gewünschten API-Aufrufs mit
         // @return: Promise
 
         try {
@@ -65,7 +66,7 @@ function Vat4lApp() {
 
         // Festlegung der Spalten-Werte unf Überschriften:
         let col_size = ["4", "1", "1", "1", "1", "2", "2"];
-        let column_names = ["Pfad", "Größe", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
+        let column_names = ["Pfad", "Größe [Byte]", "Benutzer", "Gruppe", "Dateirechte", "erstellt am", "letzte Änderung am"];
 
         // Durchführung der API-Aufrufe
         let resultlist1 = await this.callAPI(api_request + '/getdelta/' + source + '/' + target);
@@ -121,43 +122,57 @@ function Vat4lApp() {
             data_source.username= resultlist2[i].s_user_name;
             data_source.groupname= resultlist2[i].s_group_name;
             data_source.filemode= resultlist2[i].s_filemode;
-            data_source.created_date= resultlist2[i].s_created_date;
-            data_source.modified_date= resultlist2[i].s_modified_date;
+            data_source.set_created_date(resultlist2[i].s_created_date);
+            data_source.set_modified_date(resultlist2[i].s_modified_date);
 
             datablock = {data_source, data_target}
             changed_data.push(datablock)
         }
-        let html_compinfo =
-            `<div>
-                <p>Es wurden die Jobs mit den ID's ${job_source[0].id_job} von ${job_source[0].dt_end_job} und ${job_target[0].id_job} vom ${job_target[0].dt_end_job} miteinander verglichen. Dabei wurden folgende Unterschiede vom System erkannt:</p>
+
+         // Es wurden keine Unterschiede gefunden
+        if((created_data.length === 0) && (deleted_data.length === 0) && (resultlist2.length === 0)) {
+            let html_no_result =
+                `<div>
+                <p>Es wurden keine Unterschiede zwischen den Jobs mit den ID's ${job_source[0].id_job} von ${new DateFormatter(job_source[0].dt_end_job).date_formatted} und ${job_target[0].id_job} vom ${new DateFormatter(job_target[0].dt_end_job).date_formatted} gefunden.</p>
+             </div>`
+
+            document.querySelector("#container").insertAdjacentHTML('beforeend', html_no_result);
+        } else {
+            let html_compinfo =
+                `<div>
+                <p>Es wurden die Jobs mit den ID's ${job_source[0].id_job} von ${new DateFormatter(job_source[0].dt_end_job).date_formatted} und ${job_target[0].id_job} vom ${new DateFormatter(job_target[0].dt_end_job).date_formatted} miteinander verglichen. Dabei wurden folgende Unterschiede vom System erkannt:</p>
                 <ul>
                     <li>Es wurden ` + created_data.length + ` neue Dateien gefunden</li>
                     <li>` + deleted_data.length + ` Dateien wurden aus den Verzeichnissen entfernt</li>
                     <li>Es sind ` + changed_data.length + ` Anpassungen in Dateien vorgenommen worden</li>    
                 </ul> 
+                <p style="font-size: xx-small">(Unterschiedliche Werte werden als Quelle/Ziel im Vergleich dargestellt.)</p>
              </div>`
 
-         document.querySelector("#container").insertAdjacentHTML('beforeend', html_compinfo);
+            document.querySelector("#container").insertAdjacentHTML('beforeend', html_compinfo);
 
-        //Ausgabe der Ergebnisse auf dem Bildschirm:
-        // Neue Inhalte:
-        if (created_data.length > 0) {
-            this.addHeadLine("createdData", "Neue Elemente:", "#container");
-            let html1 = this.printResultList(column_names, col_size, "tbl_created", "#createdData", created_data);
-            document.querySelector("#createdData").insertAdjacentHTML('beforeend', html1);
+            //Ausgabe der Ergebnisse auf dem Bildschirm:
+            // Neue Inhalte:
+            if (created_data.length > 0) {
+                this.addHeadLine("createdData", "Neue Elemente:", "#container");
+                let html1 = this.printResultList(column_names, col_size, "tbl_created", "#createdData", created_data);
+                document.querySelector("#createdData").insertAdjacentHTML('beforeend', html1);
+            }
+            // Gelöschte Inhalte:
+            if (deleted_data.length > 0) {
+                this.addHeadLine("deletedData", "Gelöschte Elemente:", "#container");
+                let html2 = this.printResultList(column_names, col_size, "tbl_deleted", "#deletedData", deleted_data);
+                document.querySelector("#deletedData").insertAdjacentHTML('beforeend', html2);
+            }
+            // Unterschiedliche Inhalte
+            if (resultlist2.length > 0) {
+                this.addHeadLine("changedData", "Geänderte Elemente:", "#container");
+                let html = this.printResultList(column_names, col_size, "tbl_changed", "#changedData", changed_data);
+                document.querySelector("#changedData").insertAdjacentHTML('beforeend', html);
+            }
         }
-        // Gelöschte Inhalte:
-        if (deleted_data.length > 0) {
-            this.addHeadLine("deletedData", "Gelöschte Elemente:", "#container");
-            let html2 = this.printResultList(column_names, col_size, "tbl_deleted", "#deletedData", deleted_data);
-            document.querySelector("#deletedData").insertAdjacentHTML('beforeend', html2);
-        }
-        // Unterschiedliche Inhalte
-        if (resultlist2.length > 0) {
-            this.addHeadLine("changedData", "Geänderte Elemente:", "#container");
-            let html = this.printResultList(column_names, col_size, "tbl_changed", "#changedData", changed_data);
-            document.querySelector("#changedData").insertAdjacentHTML('beforeend', html);
-        }
+
+
     }
 
     //--------------------------------------------------------------------
@@ -186,8 +201,8 @@ function Vat4lApp() {
             html += `
                  <div class="row" id="job-element-${job.id_job}">${
                 this.printCol("checkbox", "text-center", job.id_job, null, col_size[0]) +
-                this.printCol("date", "text-center", job.dt_start_job, null, col_size[1]) +
-                this.printCol("date", "text-center", job.dt_end_job, null, col_size[2]) +
+                this.printCol("date", "text-center", new DateFormatter(job.dt_start_job).date_formatted, null, col_size[1]) +
+                this.printCol("date", "text-center", new DateFormatter(job.dt_end_job).date_formatted, null, col_size[2]) +
                 this.printCol("text", "text-center", job.int_processed_dir, null, col_size[3]) +
                 this.printCol("text", "text-center", job.int_processed_file, null, col_size[4])}
                  </div>
@@ -377,6 +392,20 @@ function Vat4lApp() {
         container.insertAdjacentHTML('beforeend', html);
     }
 
+    class DateFormatter {
+        constructor(date_value) {
+            this.date_formatted = this._prepareDate(date_value);
+        }
+
+        _prepareDate (datetime_value) {
+            var elements= datetime_value.split("T");
+            var date_elements= elements[0].split("-");
+            var time_elements= elements[1].split(":");
+
+            let date= new Date(date_elements[0], date_elements[1]-1, date_elements[2],time_elements[0], time_elements[1], time_elements[2]);
+            return date.toLocaleDateString() + " "+ date.toLocaleTimeString();
+        }
+    }
     class ResultlistRow {
         constructor() {
             this.id=0
@@ -395,14 +424,34 @@ function Vat4lApp() {
             this.username= dataset.user_name;
             this.groupname= dataset.group_name;
             this.filemode= dataset.filemode;
+            this.created_date = new DateFormatter(dataset.created_date).date_formatted;
+            this.modified_date = new DateFormatter(dataset.modified_date).date_formatted;
+            /*
             if (dataset.created_date !== "-") {
                 this.created_date= this._prepareDate(dataset.created_date);
             }
-             if (dataset.modified_date !== "-") {
+            if (dataset.modified_date !== "-") {
                 this.modified_date= this._prepareDate(dataset.modified_date);
+            }
+             */
+        }
+
+        set_created_date(value) {
+            if (value !== "-") {
+                this.created_date= this._prepareDate(value);
+            } else {
+                this.created_date = "-"
             }
         }
 
+        set_modified_date(value) {
+            if (value !== "-") {
+
+                this.modified_date= this._prepareDate(value);
+            }else {
+                this.modified_date = "-"
+            }
+        }
         _prepareDate (datetime_value) {
             var elements= datetime_value.split("T");
             var date_elements= elements[0].split("-");

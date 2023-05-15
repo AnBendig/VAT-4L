@@ -49,7 +49,7 @@ async def get_api_info():
 @application.get("/vat4l-api/jobs")
 async def get_job_list():
     """Liefert eine Liste aller Jobs aus der Tabelle tbl_job"""
-    str_query = "SELECT * FROM tbl_job"
+    str_query = "SELECT * FROM tbl_job ORDER BY id_job DESC"
     result = sql_connector.readData(str_query)
     return result
 
