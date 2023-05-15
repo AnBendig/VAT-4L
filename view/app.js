@@ -142,9 +142,9 @@ function Vat4lApp() {
                 `<div>
                 <p>Es wurden die Jobs mit den ID's ${job_source[0].id_job} von ${new DateFormatter(job_source[0].dt_end_job).date_formatted} und ${job_target[0].id_job} vom ${new DateFormatter(job_target[0].dt_end_job).date_formatted} miteinander verglichen. Dabei wurden folgende Unterschiede vom System erkannt:</p>
                 <ul>
-                    <li>Es wurden ` + created_data.length + ` neue Dateien gefunden</li>
-                    <li>` + deleted_data.length + ` Dateien wurden aus den Verzeichnissen entfernt</li>
-                    <li>Es sind ` + changed_data.length + ` Anpassungen in Dateien vorgenommen worden</li>    
+                    <li>Es wurden ` + created_data.length + ` neue Dateien gefunden <a href="#pos_createdData"><ion-icon name="arrow-down-outline" /></a></li>
+                    <li>` + deleted_data.length + ` Dateien wurden aus den Verzeichnissen entfernt <a href="#pos_deletedData"><ion-icon name="arrow-down-outline" /></a></li>
+                    <li>Es sind ` + changed_data.length + ` Anpassungen in Dateien vorgenommen worden <a href="#pos_changedData"><ion-icon name="arrow-down-outline" /></a></li>   
                 </ul> 
                 <p style="font-size: xx-small">(Unterschiedliche Werte werden als Quelle/Ziel im Vergleich dargestellt.)</p>
              </div>`
@@ -185,6 +185,13 @@ function Vat4lApp() {
         // @return: String - HTML der generierten Tabelle
 
         // Überschriften schreiben
+        let html_head_txt = `
+            <div>
+                <p>Bitte wählen Sie zwei Jobs für einen Vergleich aus der Liste aus:</p><br>
+            </div> 
+        `
+        document.querySelector("#container").insertAdjacentHTML('beforeend', html_head_txt);
+
         this.tableHeader("job_header", "#container");
 
         // SpaltenÜberschriften schreiben
@@ -197,9 +204,16 @@ function Vat4lApp() {
         for (let i = 0; i < data.length; i++) {
             let job = data[i];
 
+             let html_style;
+            if ( i % 2 === 0 ) {
+                html_style="background-color: #eeeeee;"
+            } else {
+                html_style=""
+            }
+
             // Füge für jeden Datensatz eine Zeile mit den Informationen hinzu
             html += `
-                 <div class="row" id="job-element-${job.id_job}">${
+                 <div class="row" style="${html_style}" id="job-element-${job.id_job}">${
                 this.printCol("checkbox", "text-center", job.id_job, null, col_size[0]) +
                 this.printCol("date", "text-center", new DateFormatter(job.dt_start_job).date_formatted, null, col_size[1]) +
                 this.printCol("date", "text-center", new DateFormatter(job.dt_end_job).date_formatted, null, col_size[2]) +
@@ -219,7 +233,7 @@ function Vat4lApp() {
         //          dom_element - DOM-Element. Der Bereich, dem das zu generierende Element hinzugefügt wird.
 
         let html = `
-            <div class="row"><h2>${txt_headline}</h2></div>
+            <div class="row"><h2 id="pos_${id_headline}">${txt_headline}</h2></div>
             <div id="${id_headline}"></div> 
         `;
         document.querySelector(dom_element).insertAdjacentHTML('beforeend', html);
@@ -248,9 +262,15 @@ function Vat4lApp() {
         // Ermittle den HTML-Code je Datenzeile:
         for (let i = 0; i <= datablock.length - 1; i++) {
             let element = datablock[i];
+            let html_style;
+            if ( i % 2 === 0 ) {
+                html_style="background-color: #eeeeee;"
+            } else {
+                html_style=""
+            }
 
             html += `
-                         <div class="row" id="job-element-${element.data_source.id}">${
+                         <div class="row" style="${html_style}" id="job-element-${element.data_source.id}">${
                 // this.printCol("text", "text-center", element.id, col_size[0]) +
                 // this.printCol("text", "text-center", element.job_id, col_size[1]) +
                 this.printCol("text", "text-start", element.data_source.path, null, col_size[0]) +
@@ -292,7 +312,7 @@ function Vat4lApp() {
         //          str_parent -   String. Name des Übergeordneten Elements
 
         let html = `
-            <div class="row bg-body-secondary" id="${str_headerID}">            
+            <div class="row" style="background-color: lightblue; padding-top: 5px; padding-bottom: 5px;" id="${str_headerID}">            
             </div>
         `;
         document.querySelector(str_parentID).insertAdjacentHTML('beforeend', html)
@@ -316,15 +336,11 @@ function Vat4lApp() {
 
             case "checkbox":
                 // Zeichnet eine Checkbox:
-                html = `<div class="col-sm-${size}">
-                        <div class="input-group mb-3">
-                          <div class="input-group-text small">
+                html = `<div class="col-sm-${size}" style="padding-top: 5px; font-size: small;">
                             <span class="${align}">
-                                <input class="form-check-input mt-0" type="checkbox" id="selectID${s_field}" name="selectID" ="${s_field}" value="${s_field}">
-                                <label for="selectID${s_field}">&nbsp;${s_field}</label> 
+                                <input class="form-check-input mt-0" style="vertical-align: baseline" type="checkbox" id="selectID${s_field}" name="selectID" ="${s_field}" value="${s_field}">
+                                <label for="selectID${s_field}" style="vertical-align: baseline">&nbsp;${s_field}</label> 
                             </span>
-                          </div>
-                       </div>
                       </div>`;
                 break;
 
